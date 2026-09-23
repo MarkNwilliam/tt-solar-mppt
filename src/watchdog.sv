@@ -2,8 +2,8 @@
 // The top-level heartbeat (MPPT tick) kicks it once per slow cycle. Zeroing
 // TIMEOUT disables the wdt.
 module watchdog #(
-    parameter W       = 16,
-    parameter TIMEOUT = 16'd65535
+    parameter W       = 13,
+    parameter TIMEOUT = 13'd8191
 ) (
     input  wire       clk,
     input  wire       rst_n,

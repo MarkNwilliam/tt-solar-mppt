@@ -11,11 +11,12 @@
  *
  * The core runs the P&O MPPT, the battery charge FSM
  * (OFF->BULK->ABSORPTION->FLOAT->(EQUALIZE)/FAULT), generates the switching
- * PWM, latches protection faults, sleeps at night, and emits a 7-byte UART
+ * PWM, latches protection faults, sleeps at night, and emits a 5-byte UART
  * telemetry frame (9600 8N1) every TEL_DIV_M MPPT ticks:
  *
  *     0x55 | vpv[11:4] | ipv[11:4] | vbat[11:4] | ibat[11:4]
- *           | duty | {chg[2:0],flt[4:0]}
+ *
+ * (DUTY / charge stage / fault are exposed directly on the output pins.)
  *
  * Pin map:
  *   ui_in[0]   = EN            global enable (also AND'ed with ena)
@@ -46,7 +47,7 @@ module tt_um_marknwilliam_mppt #(
     parameter TEL_DIV_M  = 12'd1000,   // telemetry frame every 1000 mppt ticks
     parameter BAUD_DIV   = 12'd833,    // 9600 baud @ 16 MHz
     parameter PWMPERIOD  = 8'd100,     // ~158 kHz switcher @ 16 MHz
-    parameter WDT_TIMEOUT = 16'd65535
+    parameter WDT_TIMEOUT = 14'd8191
 ) (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
