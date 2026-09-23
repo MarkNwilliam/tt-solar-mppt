@@ -12,8 +12,9 @@ off-grid market where MPPT controllers are imported and expensive.
 - **Protection**: panel OV/UV, battery OV/UV (debounced), charge over-current.
 - **PWM** output for an external buck/boost + gate driver (~158 kHz default).
 - **Night sleep** when the panel is dark; wakes on morning light.
-- **Watchdog**, and a 5-byte **9600-8N1 UART telemetry** frame (the four ADC
-  samples; duty/stage/fault are on the output pins).
+- **Watchdog**, and a 4-byte **9600-8N1 UART telemetry** frame (panel/battery
+  voltages + battery current; PV current, duty, stage and faults live on the
+  `DUTY`/`LED`/`FAULT` output pins).
 - ADC values come in over a 3-wire SPI slave port (`[ch[3:0]|data[11:0]]`),
   streamed by a host MCU from the off-chip 12-bit sensor.
 

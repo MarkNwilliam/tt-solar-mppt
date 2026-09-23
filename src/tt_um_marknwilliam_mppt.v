@@ -11,12 +11,13 @@
  *
  * The core runs the P&O MPPT, the battery charge FSM
  * (OFF->BULK->ABSORPTION->FLOAT->(EQUALIZE)/FAULT), generates the switching
- * PWM, latches protection faults, sleeps at night, and emits a 5-byte UART
+ * PWM, latches protection faults, sleeps at night, and emits a 4-byte UART
  * telemetry frame (9600 8N1) every TEL_DIV_M MPPT ticks:
  *
- *     0x55 | vpv[11:4] | ipv[11:4] | vbat[11:4] | ibat[11:4]
+ *     0x55 | vpv[11:4] | vbat[11:4] | ibat[11:4]
  *
- * (DUTY / charge stage / fault are exposed directly on the output pins.)
+ * (PV current, duty and charge/fault status are exposed directly on the
+ * DUTY and LED/FAULT output pins.)
  *
  * Pin map:
  *   ui_in[0]   = EN            global enable (also AND'ed with ena)

@@ -14,7 +14,7 @@
   "//": "PL_TARGET_DENSITY_PCT - global placement density. ~0.86 min feasible on",
   "//": "the fixed 1x1 die after the VW=10 shrink + L/R margin 3; 90 leaves slack",
   "//": "for the post-CTS resizer without tripping the 0.95 ceiling.",
-  "PL_TARGET_DENSITY_PCT": 90,
+  "PL_TARGET_DENSITY_PCT": 95,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
@@ -24,9 +24,9 @@
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
 
-  "//": "Keep the post-CTS resize off (its ~140-240 buffers re-triggered DPL-0036",
-  "//": "on the fixed die); re-enable the post-GRT repair so routing can fix hold.",
-  "PL_RESIZER_TIMING_OPTIMIZATIONS": 0,
+  "//": "Post-CTS + post-GRT repair passes ON: hold needs the buffer insertions;",
+  "//": "placement now fits with density 95 and the trimmed cell count below.",
+  "PL_RESIZER_TIMING_OPTIMIZATIONS": 1,
   "GRT_RESIZER_TIMING_OPTIMIZATIONS": 1,
 
   "//": "RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!",
