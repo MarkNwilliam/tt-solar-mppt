@@ -27,7 +27,8 @@ module protect #(
     output reg             pwm_off      // safe: kill PWM when tripped
 );
 
-    reg [12:0] uv_cnt;
+    localparam int UVW = $clog2(MAXHOLD + 1);
+    reg [UVW-1:0] uv_cnt;
 
     // Candidates each tick (combination of live levels)
     logic [4:0] trip;

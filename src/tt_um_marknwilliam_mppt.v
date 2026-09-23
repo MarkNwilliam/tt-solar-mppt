@@ -11,13 +11,13 @@
  *
  * The core runs the P&O MPPT, the battery charge FSM
  * (OFF->BULK->ABSORPTION->FLOAT->(EQUALIZE)/FAULT), generates the switching
- * PWM, latches protection faults, sleeps at night, and emits a 4-byte UART
+ * PWM, latches protection faults, sleeps at night, and emits a 3-byte UART
  * telemetry frame (9600 8N1) every TEL_DIV_M MPPT ticks:
  *
- *     0x55 | vpv[11:4] | vbat[11:4] | ibat[11:4]
+ *     vpv[11:4] | vbat[11:4] | ibat[11:4]
  *
- * (PV current, duty and charge/fault status are exposed directly on the
- * DUTY and LED/FAULT output pins.)
+ * (no sync byte; the receiver re-syncs on the tx-busy idle gap. PV current,
+ * duty and charge/fault status are on the DUTY and LED/FAULT pins.)
  *
  * Pin map:
  *   ui_in[0]   = EN            global enable (also AND'ed with ena)
@@ -48,7 +48,7 @@ module tt_um_marknwilliam_mppt #(
     parameter TEL_DIV_M  = 12'd1000,   // telemetry frame every 1000 mppt ticks
     parameter BAUD_DIV   = 12'd833,    // 9600 baud @ 16 MHz
     parameter PWMPERIOD  = 8'd100,     // ~158 kHz switcher @ 16 MHz
-    parameter WDT_TIMEOUT = 14'd8191
+    parameter WDT_TIMEOUT = 12'd4095
 ) (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
@@ -96,6 +96,7 @@ module tt_um_marknwilliam_mppt #(
     .FLOAT_REC   (12'd662),   // (2650/4)
     .TERM_I      (12'd24),    // (96/4)
     .EQ_HIGH     (12'd793),   // 15.5 V
+    .MAXHOLD     (13'd1023),  // hold-off ~1 s (vs default 4 s) to slim uv_cnt
     .VW_SLEEP    (12'd61),    // (245/4)
     .VW_WAKE     (12'd100)    // (400/4)
   ) u_core (
