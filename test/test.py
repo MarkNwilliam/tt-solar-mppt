@@ -108,20 +108,7 @@ async def test_solar_mppt(dut):
     await spiframe(dut, 2, 750)     # V_BAT >= CV_HIGH, below BAT_OV
     await spiframe(dut, 3, 13)      # I_BAT below termination
     await mtick(dut, 3)
-    c = None
-    try:
-        c = dut.user_project.u_core
-    except Exception as e:
-        import sys
-        sys.stderr.write(f"\nHIERERR {e}\n")
-        for n in sorted((dut._subhandles or {}).keys()):
-            sys.stderr.write(f"  dut.{n}\n")
-        raise
-    dbg = f"DBG cause={int(c.fault_cause.value)} st={int(c.chg_state.value)} "\
-          f"vpv={int(c.v_pv.value)} ipv={int(c.i_pv.value)} vbat={int(c.v_bat.value)} ibat={int(c.i_bat.value)} "\
-          f"fault={int(c.fault_i.value)} fok={int(c.fok.value)} cc={int(c.cc.value)} cv={int(c.cv.value)}"
-    import sys; sys.stderr.write("\n" + dbg + "\n")
-    assert (bits(dut) & 0x30) == 0x20, f"DBG2 {dbg} | LED {int(dut.uo_out.value):#06x} != float"
+    assert (bits(dut) & 0x30) == 0x20, f"LED {int(dut.uo_out.value):#06x} != float"
 
     # -- battery overvoltage -> latched fault, PWM off, LED fault --
     await spiframe(dut, 2, 875)
