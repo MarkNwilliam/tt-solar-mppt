@@ -51,12 +51,12 @@
   "//": "Don't put clock buffers on the outputs",
   "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
 
-  "//": "Reduce wasted space (margins shrunk from 6 -> 3 to enlarge the core",
+  "//": "Reduce wasted space (margins shrunk from 6 -> 2 to enlarge the core",
   "//": "area inside the fixed 1x1 project tile; the MPPT core is cell-bound).",
   "TOP_MARGIN_MULT": 1,
   "BOTTOM_MARGIN_MULT": 1,
-  "LEFT_MARGIN_MULT": 3,
-  "RIGHT_MARGIN_MULT": 3,
+  "LEFT_MARGIN_MULT": 2,
+  "RIGHT_MARGIN_MULT": 2,
 
   "//": "Absolute die size",
   "FP_SIZING": "absolute",
