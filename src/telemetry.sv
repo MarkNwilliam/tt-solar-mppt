@@ -1,17 +1,18 @@
-// telemetry.sv — UART TX of a 3-byte status frame (8N1, LSB-first bits)
-// Wire order (byte 0 first): vpv[11:4] | vbat[11:4] | ibat[11:4].
-// Samples carry their top 8 bits (78 mV / 78 mA resolution on the 20 V / 20 A
-// scale). There is no sync byte: the receiver re-syncs on the idle gap enforced
-// by tx_busy. PV current and the switcher duty / charge stage {chg[2:0]} /
-// fault latch {flt[4:0]} are deliberately NOT in the frame — MPPT perturbation
-// is visible as duty motion, and the rest is already exposed live on uio_out
-// (DUTY[7:0]) and uo_out (LED0/LED1/FAULT), so a 3-byte frame keeps the
-// snapshot register small and only sends what is not visible on pins.
+// telemetry.sv — UART TX of a 2-byte status frame (8N1, LSB-first bits)
+// Wire order (byte 0 first): vpv[11:4] | vbat[11:4].
+// Samples carry their top 8 bits (78 mV resolution on the 20 V / 20 A scale).
+// There is no sync byte: the receiver re-syncs on the idle gap enforced by
+// tx_busy. PV/battery currents and the switcher duty / charge stage
+// {chg[2:0]} / fault latch {flt[4:0]} are deliberately NOT in the frame —
+// MPPT perturbation is visible as duty motion, and the rest is already
+// exposed live on uio_out (DUTY[5:0]) and uo_out (LED0/LED1/FAULT), so a
+// 2-byte frame keeps the snapshot register small and only sends what is not
+// visible on pins.
 // `tx_go` snapshots the inputs and transmits each bit for BAUD_DIV clocks.
 module telemetry #(
     parameter VW       = 12,
     parameter BAUD_DIV = 12'd833,     // 8 MHz / 9600
-    parameter NBYTES   = 3
+    parameter NBYTES   = 2
 ) (
     input  wire          clk,
     input  wire          rst_n,
@@ -46,7 +47,6 @@ module telemetry #(
     );
         frame_of[8*(NBYTES-1)   +: 8] = vpv[VW-1 -: 8];
         frame_of[8*(NBYTES-2)   +: 8] = vbat[VW-1 -: 8];
-        frame_of[8*(NBYTES-3)   +: 8] = ibat[VW-1 -: 8];
     endfunction
 
     function automatic logic [7:0] byte_of(input logic [FW-1:0] f,
