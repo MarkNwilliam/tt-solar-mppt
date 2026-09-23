@@ -1,12 +1,14 @@
-// telemetry.sv — UART TX of a 12-byte status frame (8N1, LSB-first bits)
+// telemetry.sv — UART TX of an 8-byte status frame (8N1, LSB-first bits)
 // Wire order (byte 0 first):
-//   0x55 hdr | vpv[15:8] vpv[7:0] ipv[15:8] ipv[7:0] | vbat[15:8] vbat[7:0]
-//        ibat[15:8] ibat[7:0] | duty | {5'b0,chg[2:0]} | {3'b0,flt[4:0]}
+//   0x55 | vpv[11:4] | ipv[11:4] | vbat[11:4] | ibat[11:4]
+//        | duty | {5'b0,chg[2:0]} | {3'b0,flt[4:0]}
+// Each sample carries its top 8 bits (78 mV / 78 mA resolution on the
+// 20 V / 20 A scale) — a compact frame keeps the snapshot register small.
 // `tx_go` snapshots the inputs and transmits each bit for BAUD_DIV clocks.
 module telemetry #(
     parameter VW       = 12,
     parameter BAUD_DIV = 12'd833,     // 8 MHz / 9600
-    parameter NBYTES   = 12
+    parameter NBYTES   = 8
 ) (
     input  wire          clk,
     input  wire          rst_n,
@@ -39,17 +41,13 @@ module telemetry #(
         input logic [4:0]    flt
     );
         frame_of[8*(NBYTES-1)   +: 8] = 8'h55;
-        frame_of[8*(NBYTES-2)   +: 8] = {4'b0, vpv[VW-1:VW-8]};
-        frame_of[8*(NBYTES-3)   +: 8] = vpv[7:0];
-        frame_of[8*(NBYTES-4)   +: 8] = {4'b0, ipv[VW-1:VW-8]};
-        frame_of[8*(NBYTES-5)   +: 8] = ipv[7:0];
-        frame_of[8*(NBYTES-6)   +: 8] = {4'b0, vbat[VW-1:VW-8]};
-        frame_of[8*(NBYTES-7)   +: 8] = vbat[7:0];
-        frame_of[8*(NBYTES-8)   +: 8] = {4'b0, ibat[VW-1:VW-8]};
-        frame_of[8*(NBYTES-9)   +: 8] = ibat[7:0];
-        frame_of[8*(NBYTES-10)  +: 8] = dutc;
-        frame_of[8*(NBYTES-11)  +: 8] = {5'b0, chg};
-        frame_of[8*(NBYTES-12)  +: 8] = {3'b0, flt};
+        frame_of[8*(NBYTES-2)   +: 8] = vpv[VW-1 -: 8];
+        frame_of[8*(NBYTES-3)   +: 8] = ipv[VW-1 -: 8];
+        frame_of[8*(NBYTES-4)   +: 8] = vbat[VW-1 -: 8];
+        frame_of[8*(NBYTES-5)   +: 8] = ibat[VW-1 -: 8];
+        frame_of[8*(NBYTES-6)   +: 8] = dutc;
+        frame_of[8*(NBYTES-7)   +: 8] = {5'b0, chg};
+        frame_of[8*(NBYTES-8)   +: 8] = {3'b0, flt};
     endfunction
 
     function automatic logic [7:0] byte_of(input logic [FW-1:0] f,

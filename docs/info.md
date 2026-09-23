@@ -39,8 +39,8 @@ parameterized so the same core scales to 48 V packs by changing thresholds.
 6. Drop `V_PV` below ~1.2 V: the core enters night sleep (`LED = 00`, PWM off).
 
 A 9600-8N1 UART frame on `UART_TX` repeats every 1000 MPPT ticks:
-`0x55 | vpv[15:8] vpv[7:0] ipv[15:8] ipv[7:0] | vbat[15:8] vbat[7:0] |
-ibat[15:8] ibat[7:0] | duty | {5'b0,chg[2:0]} | {3'b0,flt[4:0]}`.
+`0x55 | vpv[11:4] | ipv[11:4] | vbat[11:4] | ibat[11:4] | duty |
+{5'b0,chg[2:0]} | {3'b0,flt[4:0]}` (each sample carries its top 8 bits).
 
 ## External hardware
 

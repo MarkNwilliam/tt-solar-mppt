@@ -1,6 +1,8 @@
 // mppt_fsm.sv — Perturb & Observe maximum power point tracker
 // On every `tick` (slow sample strobe):
-//   1. P = V_pv * I_pv;  PW = 2*VW+2 bits so 12x12 products never overflow.
+//   1. P = V_pv * I_pv over the top PVB bits of each 12-bit sample (a /256
+//      "power signature"; plenty of resolution for P&O, keeps the multiplier
+//      small for the 1x1 tile).
 //   2. dP = P - P_prev (signed). If |dP| >= HYST the direction reverses only
 //      when power shrank; it keeps marching while power grows.
 //   3. duty += dir * step; STEP_COARSE when |dP| >= 4*HYST, else STEP_FINE.
@@ -14,7 +16,7 @@ module mppt_fsm #(
     parameter DUTY_MAX   = 8'd248,
     parameter STEP_FINE  = 8'd1,
     parameter STEP_COARSE = 8'd4,
-    parameter HYST       = 16'd16
+    parameter HYST       = 16'd1        // in 16-bit scaled-power units (~ /256)
 ) (
     input  wire               clk,
     input  wire               rst_n,
@@ -27,13 +29,44 @@ module mppt_fsm #(
     output reg                at_mpp
 );
 
-    localparam int PW = VW * 2 + 2;           // power width, +2 headroom
+    localparam int PVB = 8;                   // power-signature bits (top of VW)
+    localparam int PW  = 2 * PVB;             // power width (16)
 
-    logic [PW-1:0] p;
-    logic [PW-1:0] p_prev;
-    logic [PW  :0] dP;                        // signed, PW+1 wide
+    // Serial shift-add multiplier (MAC): computes the power signature with one
+    // partial-product addition per clock over a PVB-clock window. Bit-exact to
+    // a combinational multiply but ~4x smaller (the board multiplier was the
+    // single biggest cell in the design and blew the 1x1 tile budget).
+    // The product is refreshed continuously; the MPPT only samples it on
+    // `tick`, and V_pv/I_pv change far more slowly than one product window.
+    logic [PVB-1:0] qa, qb;
+    logic [PW-1:0]  acc;
+    logic [3:0]     cs;                         // window step 0..PVB
+    logic [PW-1:0]  p;
+    logic [PW-1:0]  p_prev;
+    logic [PW  :0]  dP;                         // signed, PW+1 wide
 
-    assign p  = v_pv * i_pv;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            qa <= '0; qb <= '0; acc <= '0; cs <= 4'd0; p <= '0;
+        end else if (cs == PVB[3:0]) begin
+            // window finished: latch the product, open the next window
+            p   <= acc + (qb[PVB-1] ? (qa << (PVB - 1)) : '0);
+            qa  <= v_pv[VW-1 -: PVB];
+            qb  <= i_pv[VW-1 -: PVB];
+            acc <= '0;
+            cs  <= 4'd1;
+        end else if (cs == 4'd0) begin
+            // fresh window on the current samples
+            qa  <= v_pv[VW-1 -: PVB];
+            qb  <= i_pv[VW-1 -: PVB];
+            acc <= '0;
+            cs  <= 4'd1;
+        end else begin
+            acc <= acc + (qb[cs - 1] ? (qa << (cs - 1)) : '0);
+            cs  <= cs + 1'b1;
+        end
+    end
+
     assign dP = {1'b0, p} - {1'b0, p_prev};
 
     logic dP_neg;
