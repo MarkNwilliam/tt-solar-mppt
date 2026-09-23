@@ -79,7 +79,7 @@ module tt_um_marknwilliam_mppt #(
 
   top #(
     .VW          (10),          // ADC payload keeps its top 10 of 12 bits
-    .DW          (8),
+    .DW          (6),           // duty in 64 steps (~1.6 % resolution)
     .MPPT_DIV    (MPPT_DIV),
     .TEL_DIV_M   (TEL_DIV_M),
     .BAUD_DIV    (BAUD_DIV),
