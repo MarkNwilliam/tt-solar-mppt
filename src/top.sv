@@ -78,7 +78,9 @@ module top #(
     );
 
     // ---- 2. slow tick generators ----
-    reg [15:0] m_cnt;
+    localparam int MW = $clog2(MPPT_DIV);
+    localparam int TW = $clog2(TEL_DIV_M);
+    reg [MW-1:0] m_cnt;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             m_cnt <= '0;
@@ -89,7 +91,7 @@ module top #(
     end
     assign tick_m = (m_cnt == MPPT_DIV-1);
 
-    reg [11:0] t_cnt;
+    reg [TW-1:0] t_cnt;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             t_cnt <= '0;

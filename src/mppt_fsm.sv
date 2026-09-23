@@ -1,6 +1,6 @@
 // mppt_fsm.sv — Perturb & Observe maximum power point tracker
 // On every `tick` (slow sample strobe):
-//   1. P = V_pv * I_pv over the top PVB bits of each 12-bit sample (a /256
+//   1. P = V_pv * I_pv over the top PVB bits of each 12-bit sample (a /1024
 //      "power signature"; plenty of resolution for P&O, keeps the multiplier
 //      small for the 1x1 tile).
 //   2. dP = P - P_prev (signed). If |dP| >= HYST the direction reverses only
@@ -16,7 +16,7 @@ module mppt_fsm #(
     parameter DUTY_MAX   = 8'd248,
     parameter STEP_FINE  = 8'd1,
     parameter STEP_COARSE = 8'd4,
-    parameter HYST       = 16'd1        // in 16-bit scaled-power units (~ /256)
+    parameter HYST       = 16'd1        // in 12-bit scaled-power units (~ /1024)
 ) (
     input  wire               clk,
     input  wire               rst_n,
@@ -29,8 +29,8 @@ module mppt_fsm #(
     output reg                at_mpp
 );
 
-    localparam int PVB = 8;                   // power-signature bits (top of VW)
-    localparam int PW  = 2 * PVB;             // power width (16)
+    localparam int PVB = 6;                   // power-signature bits (top of VW)
+    localparam int PW  = 2 * PVB;             // power width (12)
 
     // Serial shift-add multiplier (MAC): computes the power signature with one
     // partial-product addition per clock over a PVB-clock window. Bit-exact to

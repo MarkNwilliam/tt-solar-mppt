@@ -1,14 +1,14 @@
-// telemetry.sv — UART TX of an 8-byte status frame (8N1, LSB-first bits)
+// telemetry.sv — UART TX of a 7-byte status frame (8N1, LSB-first bits)
 // Wire order (byte 0 first):
 //   0x55 | vpv[11:4] | ipv[11:4] | vbat[11:4] | ibat[11:4]
-//        | duty | {5'b0,chg[2:0]} | {3'b0,flt[4:0]}
+//        | duty | {chg[2:0],flt[4:0]}
 // Each sample carries its top 8 bits (78 mV / 78 mA resolution on the
 // 20 V / 20 A scale) — a compact frame keeps the snapshot register small.
 // `tx_go` snapshots the inputs and transmits each bit for BAUD_DIV clocks.
 module telemetry #(
     parameter VW       = 12,
     parameter BAUD_DIV = 12'd833,     // 8 MHz / 9600
-    parameter NBYTES   = 8
+    parameter NBYTES   = 7
 ) (
     input  wire          clk,
     input  wire          rst_n,
@@ -25,11 +25,12 @@ module telemetry #(
 );
 
     localparam int FW = 8 * NBYTES;
+    localparam int BW = $clog2(BAUD_DIV);
 
     reg [FW-1:0]        frame;    // latched snapshot (byte 0 = MSB end)
     reg [3:0]           byte_ptr; // 0..NBYTES-1
     reg [3:0]           bit_ptr;  // 0=start .. 8=stop
-    reg [11:0]          baud_cnt;
+    reg [BW-1:0]        baud_cnt;
 
     function automatic logic [FW-1:0] frame_of(
         input logic [VW-1:0] vpv,
@@ -46,8 +47,7 @@ module telemetry #(
         frame_of[8*(NBYTES-4)   +: 8] = vbat[VW-1 -: 8];
         frame_of[8*(NBYTES-5)   +: 8] = ibat[VW-1 -: 8];
         frame_of[8*(NBYTES-6)   +: 8] = dutc;
-        frame_of[8*(NBYTES-7)   +: 8] = {5'b0, chg};
-        frame_of[8*(NBYTES-8)   +: 8] = {3'b0, flt};
+        frame_of[8*(NBYTES-7)   +: 8] = {chg, flt};
     endfunction
 
     function automatic logic [7:0] byte_of(input logic [FW-1:0] f,

@@ -16,7 +16,8 @@ module sleep_mgr #(
     output reg             sleep
 );
 
-    reg [7:0] low_cnt;
+    localparam int LW = $clog2(CNT_SLEEP + 1);
+    reg [LW-1:0] low_cnt;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

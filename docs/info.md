@@ -40,7 +40,7 @@ parameterized so the same core scales to 48 V packs by changing thresholds.
 
 A 9600-8N1 UART frame on `UART_TX` repeats every 1000 MPPT ticks:
 `0x55 | vpv[11:4] | ipv[11:4] | vbat[11:4] | ibat[11:4] | duty |
-{5'b0,chg[2:0]} | {3'b0,flt[4:0]}` (each sample carries its top 8 bits).
+{chg[2:0],flt[4:0]}` (each sample carries its top 8 bits).
 
 ## External hardware
 
