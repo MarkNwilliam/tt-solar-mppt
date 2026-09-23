@@ -15,7 +15,24 @@ module top #(
     parameter TEL_DIV_M = 12'd1000,   // telemetry every 1000 mppt ticks
     parameter BAUD_DIV  = 12'd833,    // 9600 baud @ 8 MHz
     parameter PWMPERIOD = 8'd100,     // ~79.2 kHz switcher @ 8 MHz
-    parameter WDT_TIMEOUT = 14'd8191
+    parameter WDT_TIMEOUT = 14'd8191,
+    // Threshold bundle (12-bit scale defaults; the TT wrapper rescales/4
+    // together with VW=10 so latched analog thresholds stay in volts).
+    parameter PV_OV    = 12'd3686,
+    parameter PV_UV    = 12'd245,
+    parameter BAT_OV   = 12'd3174,
+    parameter BAT_UV   = 12'd2150,
+    parameter BAT_REC  = 12'd2355,
+    parameter I_OC     = 12'd1024,
+    parameter MAXHOLD  = 13'd4167,
+    parameter CV_HIGH  = 12'd2990,
+    parameter FLOAT_V  = 12'd2785,
+    parameter FLOAT_REC= 12'd2650,
+    parameter TERM_I   = 12'd96,
+    parameter EQ_HIGH  = 12'd3174,
+    parameter EQ_TICKS = 13'd5000,
+    parameter VW_SLEEP = 12'd245,
+    parameter VW_WAKE  = 12'd400
 ) (
     input  wire             clk,
     input  wire             rst_n,
@@ -118,7 +135,10 @@ module top #(
     );
 
     // ---- 4. charge FSM ----
-    charge_fsm #(.VW(VW)) u_charge (
+    charge_fsm #(
+        .VW(VW), .CV_HIGH(CV_HIGH), .FLOAT_V(FLOAT_V), .FLOAT_REC(FLOAT_REC),
+        .TERM_I(TERM_I), .EQ_HIGH(EQ_HIGH), .EQ_TICKS(EQ_TICKS)
+    ) u_charge (
         .clk        (clk),
         .rst_n      (rst_n),
         .en         (en),
@@ -148,7 +168,10 @@ module top #(
     );
 
     // ---- 6. protect ----
-    protect #(.VW(VW)) u_prot (
+    protect #(
+        .VW(VW), .PV_OV(PV_OV), .PV_UV(PV_UV), .BAT_OV(BAT_OV),
+        .BAT_UV(BAT_UV), .BAT_REC(BAT_REC), .I_OC(I_OC), .MAXHOLD(MAXHOLD)
+    ) u_prot (
         .clk        (clk),
         .rst_n      (rst_n),
         .tick       (tick_m),
@@ -164,7 +187,7 @@ module top #(
     );
 
     // ---- 7. sleep manager ----
-    sleep_mgr #(.VW(VW)) u_sleep (
+    sleep_mgr #(.VW(VW), .VW_SLEEP(VW_SLEEP), .VW_WAKE(VW_WAKE)) u_sleep (
         .clk    (clk),
         .rst_n  (rst_n),
         .tick   (tick_m),

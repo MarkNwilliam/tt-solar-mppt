@@ -77,13 +77,26 @@ module tt_um_marknwilliam_mppt #(
   wire [4:0] fault_cause;
 
   top #(
-    .VW          (12),
+    .VW          (10),          // ADC payload keeps its top 10 of 12 bits
     .DW          (8),
     .MPPT_DIV    (MPPT_DIV),
     .TEL_DIV_M   (TEL_DIV_M),
     .BAUD_DIV    (BAUD_DIV),
     .PWMPERIOD   (PWMPERIOD),
-    .WDT_TIMEOUT (WDT_TIMEOUT)
+    .WDT_TIMEOUT (WDT_TIMEOUT),
+    .PV_OV       (12'd921),   // 18 V   (3686/4)
+    .PV_UV       (12'd61),    // 1.2 V  (245/4)
+    .BAT_OV      (12'd793),   // 15.5 V (3174/4)
+    .BAT_UV      (12'd537),   // 10.5 V (2150/4)
+    .BAT_REC     (12'd588),   // 11.5 V (2355/4)
+    .I_OC        (12'd256),   // (1024/4)
+    .CV_HIGH     (12'd748),   // 14.6 V (2990/4)
+    .FLOAT_V     (12'd696),   // 13.6 V (2785/4)
+    .FLOAT_REC   (12'd662),   // (2650/4)
+    .TERM_I      (12'd24),    // (96/4)
+    .EQ_HIGH     (12'd793),   // 15.5 V
+    .VW_SLEEP    (12'd61),    // (245/4)
+    .VW_WAKE     (12'd100)    // (400/4)
   ) u_core (
     .clk         (clk),
     .rst_n       (rst_n),

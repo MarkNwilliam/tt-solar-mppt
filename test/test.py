@@ -70,16 +70,16 @@ async def test_solar_mppt(dut):
 
     # -- load healthy ADC samples with EN low so no tick ever sees a dead
     #    battery (a 0 V read would latch BAT_UV / PV_UV before EN rises)
-    await spiframe(dut, 0, 3400)    # V_PV  ~16.6 V
-    await spiframe(dut, 1, 600)     # I_PV
-    await spiframe(dut, 2, 2816)    # V_BAT ~13.75 V (below absorption)
-    await spiframe(dut, 3, 200)     # I_BAT
+    await spiframe(dut, 0, 850)     # V_PV  ~16.6 V (10-bit domain)
+    await spiframe(dut, 1, 150)     # I_PV
+    await spiframe(dut, 2, 704)     # V_BAT ~13.75 V (below absorption)
+    await spiframe(dut, 3, 50)      # I_BAT
 
     # -- healthy panel + battery -> BULK, PWM alive, LED charging, no fault --
     dut.ui_in.value = 0x01          # EN=1, PROFILE=00
     await mtick(dut, 3)
 
-    assert (bits(dut) & 0x30) == 0x10, f"LED {dut.uo_out.value:#x} != charging"
+    assert (bits(dut) & 0x30) == 0x10, f"LED {int(dut.uo_out.value):#06x} != charging"
     assert (bits(dut) & 0x40) == 0, "fault during healthy operation"
 
     # PWM duty ratio sanity (PWMPERIOD+ guard across a few periods)
@@ -105,13 +105,26 @@ async def test_solar_mppt(dut):
     dut.ui_in.value = 0x01
 
     # -- battery reaches absorption with tapering current -> FLOAT --
-    await spiframe(dut, 2, 3000)    # V_BAT >= CV_HIGH, below BAT_OV
-    await spiframe(dut, 3, 50)      # I_BAT below termination
+    await spiframe(dut, 2, 750)     # V_BAT >= CV_HIGH, below BAT_OV
+    await spiframe(dut, 3, 13)      # I_BAT below termination
     await mtick(dut, 3)
-    assert (bits(dut) & 0x30) == 0x20, f"LED {dut.uo_out.value:#x} != float"
+    c = None
+    try:
+        c = dut.user_project.u_core
+    except Exception as e:
+        import sys
+        sys.stderr.write(f"\nHIERERR {e}\n")
+        for n in sorted((dut._subhandles or {}).keys()):
+            sys.stderr.write(f"  dut.{n}\n")
+        raise
+    dbg = f"DBG cause={int(c.fault_cause.value)} st={int(c.chg_state.value)} "\
+          f"vpv={int(c.v_pv.value)} ipv={int(c.i_pv.value)} vbat={int(c.v_bat.value)} ibat={int(c.i_bat.value)} "\
+          f"fault={int(c.fault_i.value)} fok={int(c.fok.value)} cc={int(c.cc.value)} cv={int(c.cv.value)}"
+    import sys; sys.stderr.write("\n" + dbg + "\n")
+    assert (bits(dut) & 0x30) == 0x20, f"DBG2 {dbg} | LED {int(dut.uo_out.value):#06x} != float"
 
     # -- battery overvoltage -> latched fault, PWM off, LED fault --
-    await spiframe(dut, 2, 3500)
+    await spiframe(dut, 2, 875)
     await mtick(dut, 2)
     assert (bits(dut) & 0x40) == 0x40, "BAT_OV not latched"
     assert (bits(dut) & 0x02) == 0x02, "PWM_OFF not asserted on fault"
@@ -121,7 +134,7 @@ async def test_solar_mppt(dut):
     assert (bits(dut) & 0x30) == 0x30, "LED not showing fault"
 
     # -- recover: restore healthy V_BAT first, then clear the latch --
-    await spiframe(dut, 2, 2816)
+    await spiframe(dut, 2, 704)
     await mtick(dut, 1)
     dut.ui_in.value = 0x11          # EN | FLT_CLEAR
     await mtick(dut, 1)             # hold clear across a tick
@@ -131,7 +144,7 @@ async def test_solar_mppt(dut):
     assert (bits(dut) & 0x10) == 0x10, "not back to charging after recovery"
 
     # -- night: panel drops -> sleep, PWM gated off --
-    await spiframe(dut, 0, 200)     # V_PV below sleep/UV threshold
+    await spiframe(dut, 0, 50)      # V_PV below sleep/UV threshold
     await mtick(dut, 10)
     assert (bits(dut) & 0x80) == 0x80, "sleep_mgr did not enter night sleep"
     for _ in range(20):
@@ -139,7 +152,7 @@ async def test_solar_mppt(dut):
         await ClockCycles(dut.clk, 1)
 
     # -- morning: panel wakes -> sleep clears --
-    await spiframe(dut, 0, 3400)
-    await spiframe(dut, 1, 600)
+    await spiframe(dut, 0, 850)
+    await spiframe(dut, 1, 150)
     await mtick(dut, 2)
     assert (bits(dut) & 0x80) == 0, "sleep_mgr did not wake in the morning"

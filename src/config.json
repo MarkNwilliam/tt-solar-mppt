@@ -11,9 +11,10 @@
 
   "//": "Here are some of the variables you may want to change:",
 
-  "//": "PL_TARGET_DENSITY_PCT - global placement density. The MPPT core needs",
-  "//": "~0.95 minimum feasible density to fit the fixed 1x1 die (DPL-0036).",
-  "PL_TARGET_DENSITY_PCT": 95,
+  "//": "PL_TARGET_DENSITY_PCT - global placement density. ~0.86 min feasible on",
+  "//": "the fixed 1x1 die after the VW=10 shrink + L/R margin 3; 90 leaves slack",
+  "//": "for the post-CTS resizer without tripping the 0.95 ceiling.",
+  "PL_TARGET_DENSITY_PCT": 90,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
@@ -22,6 +23,12 @@
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
+
+  "//": "Disable the setup/hold repair passes: the core is shallow (counters +",
+  "//": "finite-state MAC at 20 ns); the resizer was adding ~140-240 buffers that",
+  "//": "re-triggered DPL-0036 on the fixed die. Timing slack is enormous here.",
+  "PL_RESIZER_TIMING_OPTIMIZATIONS": 0,
+  "GRT_RESIZER_TIMING_OPTIMIZATIONS": 0,
 
   "//": "RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!",
   "RUN_LINTER": 1,
