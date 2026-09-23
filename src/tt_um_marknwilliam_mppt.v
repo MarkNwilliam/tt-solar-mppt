@@ -48,7 +48,7 @@ module tt_um_marknwilliam_mppt #(
     parameter TEL_DIV_M  = 12'd1000,   // telemetry frame every 1000 mppt ticks
     parameter BAUD_DIV   = 12'd833,    // 9600 baud @ 16 MHz
     parameter PWMPERIOD  = 8'd100,     // ~158 kHz switcher @ 16 MHz
-    parameter WDT_TIMEOUT = 12'd4095
+    parameter WDT_TIMEOUT = 10'd1023
 ) (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs

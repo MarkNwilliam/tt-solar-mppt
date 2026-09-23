@@ -15,7 +15,7 @@ module top #(
     parameter TEL_DIV_M = 12'd1000,   // telemetry every 1000 mppt ticks
     parameter BAUD_DIV  = 12'd833,    // 9600 baud @ 8 MHz
     parameter PWMPERIOD = 8'd100,     // ~79.2 kHz switcher @ 8 MHz
-    parameter WDT_TIMEOUT = 12'd4095,
+    parameter WDT_TIMEOUT = 10'd1023,
     // Threshold bundle (12-bit scale defaults; the TT wrapper rescales/4
     // together with VW=10 so latched analog thresholds stay in volts).
     parameter PV_OV    = 12'd3686,
