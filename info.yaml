@@ -1,0 +1,54 @@
+# Tiny Tapeout project information
+project:
+  title:        "Solar Charge Controller / MPPT"
+  author:       "Mark Nkugwa"
+  discord:      "nkugwamarkwilliam"
+  description:  "Off-grid solar charge controller with Perturb & Observe MPPT, buck/boost PWM, bulk/absorption/float charge FSM, latched protection, night sleep and UART telemetry."
+  language:     "SystemVerilog"
+  clock_hz:     16000000  # demo clock; MPPT samples at clk/MPPT_DIV
+  tiles: "1x1"
+  top_module:  "tt_um_marknwilliam_mppt"
+  source_files:
+    - "tt_um_marknwilliam_mppt.v"
+    - "top.sv"
+    - "adc_interface.sv"
+    - "charge_fsm.sv"
+    - "mppt_fsm.sv"
+    - "protect.sv"
+    - "pwm_gen.sv"
+    - "sleep_mgr.sv"
+    - "telemetry.sv"
+    - "watchdog.sv"
+
+pinout:
+  # Inputs
+  ui[0]: "EN"
+  ui[1]: "PROFILE[0]"
+  ui[2]: "PROFILE[1]"
+  ui[3]: "EQ_REQ"
+  ui[4]: "FLT_CLEAR"
+  ui[5]: "unused"
+  ui[6]: "unused"
+  ui[7]: "unused"
+
+  # Outputs
+  uo[0]: "PWM"
+  uo[1]: "PWM_OFF"
+  uo[2]: "UART_TX"
+  uo[3]: "TX_BUSY"
+  uo[4]: "LED0"
+  uo[5]: "LED1"
+  uo[6]: "FAULT"
+  uo[7]: "SLEEP"
+
+  # Bidirectional pins (inputs: ADC SPI; output: live duty)
+  uio[0]: "ADC CS_N"
+  uio[1]: "ADC SCLK"
+  uio[2]: "ADC MOSI"
+  uio[3]: "DUTY[0]"
+  uio[4]: "DUTY[1]"
+  uio[5]: "DUTY[2]"
+  uio[6]: "DUTY[3]"
+  uio[7]: "DUTY[4]" # (pin space limited; full duty via telemetry)
+
+yaml_version: 6
