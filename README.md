@@ -102,6 +102,17 @@ Ready-to-post blurb (copy/paste):
 >
 > #ASIC #TinyTapeout #MPPT #Solar #HardwareDesign #IHP
 
+### Short version (X / Twitter)
+
+Copy-paste with the 3D viewer link:
+
+> I designed & fabricated an MPPT solar charge controller core ⚡
+> P&O MPPT tracking + 4-state charge FSM, latched protection, night sleep,
+> UART telemetry · IHP SG13G2 via @TinyTapeout.
+> Clean tapeout: 2057 cells, 0.76 mW, 0 DRC/LVS/timing violations.
+> 🗺️ 3D layout: https://marknwilliam.github.io/tt-solar-mppt/
+> #chip #MPPT #Solar #ASIC
+
 ## License
 
 Apache-2.0 (see LICENSE).
