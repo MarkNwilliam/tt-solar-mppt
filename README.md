@@ -79,6 +79,29 @@ gds_output/   submitted fabrication package (GDS/OAS/LEF/SPEF/PDF, preview, metr
 Companion chip: [**EV Battery Management Supervisor**](https://github.com/MarkNwilliam/tt-bms)
 (battery `tt-` sibling) — together a full panel → charge → battery supervision stack.
 
+## Share on LinkedIn
+
+Ready-to-post blurb (copy/paste):
+
+> I fabbed my first chip! 🎉
+>
+> I designed an MPPT solar charge controller digital core — P&O maximum-power-point
+> tracking, a charge FSM (bulk/absorb/float/equalize), latched protection, night sleep,
+> and UART telemetry — and put it through a real ASIC flow via Tiny Tapeout (IHP SG13G2,
+> 1×1 tile).
+>
+> The GDS came out clean:
+> 💡 2057 instances / 1382 standard cells · 79.9% util
+> ⚙️ 0 DRC, 0 LVS, 0 timing violations
+> ⚡ 0.76 mW · 13 fanout warnings
+>
+> Full fab package (GDS/OAS/LEF/SPEF/metrics) saved and viewable in a 3D web viewer:
+> 🔬 **https://marknwilliam.github.io/tt-solar-mppt/**
+>
+> This is my answer to "yes, you can do silicon on your own laptop." 🚀
+>
+> #ASIC #TinyTapeout #MPPT #Solar #HardwareDesign #IHP
+
 ## License
 
 Apache-2.0 (see LICENSE).
